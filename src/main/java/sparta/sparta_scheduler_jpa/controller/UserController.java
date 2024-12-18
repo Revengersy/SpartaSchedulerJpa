@@ -23,7 +23,8 @@ public class UserController {
                 userService.signUp(
                         requestDto.getUsername(),
                         requestDto.getPassword(),
-                        requestDto.getAge()
+                        requestDto.getAge(),
+                        requestDto.getEmail()
                 );
 
         return new ResponseEntity<>(signUpResponseDto, HttpStatus.CREATED);

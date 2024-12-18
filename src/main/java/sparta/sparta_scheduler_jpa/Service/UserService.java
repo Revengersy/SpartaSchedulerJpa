@@ -19,21 +19,26 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public SignupResponseDto signUp(String username, String password, Integer age) {
+    public SignupResponseDto signUp(String username, String password, Integer age, String email) {
 
-        User user = new User(username, password, age);
+        User user = new User(username, password, age, email);
 
         User savedUser = userRepository.save(user);
 
-        return new SignupResponseDto(savedUser.getId(), savedUser.getUserName(), savedUser.getAge());
+        return new SignupResponseDto(savedUser.getId(), savedUser.getUserName(), savedUser.getAge(), savedUser.getEmail());
     }
 
     public LoginResponseDto login(String userName, String password) {
         // 입력받은 userName, password와 일치하는 Database 조회
-//        Long index = userRepository.findIdByUserNameAndPassword(userName, password);
+        User user = userRepository.findByUserNameAndPassword(userName, password);
 
-//        return new LoginResponseDto(index);
-        return null;
+        if (user == null) {
+            // 로그인 실패 처리
+            return null; // 또는 예외를 던집니다.
+        }
+
+        // 로그인 성공 시 LoginResponseDto 반환
+        return new LoginResponseDto(user.getId(), user.getUserName());
     }
 
     public UserResponseDto findById(Long id) {

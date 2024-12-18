@@ -2,8 +2,10 @@ package sparta.sparta_scheduler_jpa.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 @Entity
 @Table(name = "user")
 public class User extends BaseEntity {
@@ -19,17 +21,17 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
+    private String email;
 
     // 나이
     private Integer age;
 
     public User() {}
 
-    public User(String userName, String password, Integer age) {
+    public User(String userName, String password, Integer age, String email) {
         this.userName = userName;
         this.password = password;
         this.age = age;
+        this.email = email;
     }
-
-
 }

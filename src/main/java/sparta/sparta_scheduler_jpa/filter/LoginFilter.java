@@ -6,14 +6,14 @@
 //import jakarta.servlet.http.HttpSession;
 //import lombok.extern.slf4j.Slf4j;
 //import org.springframework.util.PatternMatchUtils;
+//import sparta.sparta_scheduler_jpa.controller.Const;
 //
 //import java.io.IOException;
 //
 //@Slf4j
 //public class LoginFilter implements Filter {
 //    // 인증을 하지 않아도될 URL Path 배열
-//    private static final String[] WHITE_LIST = {"/", "/user/signup", "/login", "/logout", "/session-home"};
-//    private static final String SESSION_KEY = "userSession";
+//    private static final String[] WHITE_LIST = {"/", "/user/signup", "/login", "/logout", "/session-login"};
 //
 //    @Override
 //    public void doFilter(
@@ -40,7 +40,7 @@
 //            HttpSession session = httpRequest.getSession(false);
 //
 //            // 로그인하지 않은 사용자인 경우
-//            if (session == null || session.getAttribute(SESSION_KEY) == null) {
+//            if (session == null || session.getAttribute(Const.LOGIN_USER) == null) {
 //                throw new RuntimeException("로그인 해주세요.");
 //            }
 //

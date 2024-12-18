@@ -10,6 +10,7 @@ import sparta.sparta_scheduler_jpa.dto.ScheduleResponseDto;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/schedules")
 public class ScheduleController {
@@ -20,38 +21,33 @@ public class ScheduleController {
         this.scheduleService = scheduleService;
     }
 
-
     @PostMapping
     public ResponseEntity<ScheduleResponseDto> createSchedule(@RequestBody ScheduleRequestDto requestDto) {
-
-        return new ResponseEntity<>(scheduleService.saveSchedule(requestDto), HttpStatus.CREATED);
+        ScheduleResponseDto schedule = scheduleService.saveSchedule(requestDto);
+        return new ResponseEntity<>(schedule, HttpStatus.CREATED);
     }
-
-
 
     @GetMapping
-    public List<ScheduleResponseDto> findAllSchedules() {
-
-        return scheduleService.findAllSchedules();
+    public ResponseEntity<List<ScheduleResponseDto>> findAllSchedules() {
+        List<ScheduleResponseDto> schedules = scheduleService.findAllSchedules();
+        return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<ScheduleResponseDto> findScheduleById(@PathVariable Long id) {
-
-        return new ResponseEntity<>(scheduleService.findScheduleById(id), HttpStatus.OK);
+        ScheduleResponseDto schedule = scheduleService.findScheduleById(id);
+        return new ResponseEntity<>(schedule, HttpStatus.OK);
     }
 
     @GetMapping("/writer/{writerName}")
-    public ResponseEntity<ScheduleResponseDto> findScheduleByWriter(@PathVariable String writerName) {
-
-        return new ResponseEntity<>(scheduleService.findScheduleByWriter(writerName), HttpStatus.OK);
+    public ResponseEntity<List<ScheduleResponseDto>> findSchedulesByWriter(@PathVariable String writerName) {
+        List<ScheduleResponseDto> schedules = scheduleService.findSchedulesByWriter(writerName);
+        return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
 
     @GetMapping("/date/{date}")
     public ResponseEntity<List<ScheduleResponseDto>> findScheduleByDate(@PathVariable String date) {
         List<ScheduleResponseDto> schedules = scheduleService.findScheduleByDate(date);
-
         return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
 
@@ -59,38 +55,31 @@ public class ScheduleController {
     public ResponseEntity<List<ScheduleResponseDto>> findAllSchedulesFiltered(
             @RequestParam(required = false) String editedDate,
             @RequestParam(required = false) String writerName) {
-
         List<ScheduleResponseDto> schedules = scheduleService.findAllSchedulesFiltered(editedDate, writerName);
         return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<ScheduleResponseDto> updateSchedule(
             @PathVariable Long id,
             @RequestBody ScheduleRequestDto requestDto) {
-
-        // 비밀번호와 함께 요청을 처리
-        ScheduleResponseDto updatedSchedule = scheduleService.updateSchedule(id, requestDto.getTask(), requestDto.getWriterName(), requestDto.getPassword());
+        ScheduleResponseDto updatedSchedule = scheduleService.updateSchedule(
+                id, requestDto.getTask(), requestDto.getWriterName(), requestDto.getPassword());
         return new ResponseEntity<>(updatedSchedule, HttpStatus.OK);
     }
-
 
     @PatchMapping("/{id}")
     public ResponseEntity<ScheduleResponseDto> updateWriterName(
             @PathVariable Long id,
-            @RequestBody ScheduleRequestDto requestDto
-    ) {
-
-        return new ResponseEntity<>(scheduleService.updateWriterName(id, requestDto.getWriterName()), HttpStatus.OK);
+            @RequestBody ScheduleRequestDto requestDto) {
+        ScheduleResponseDto updatedSchedule = scheduleService.updateWriterName(id, requestDto.getWriterName());
+        return new ResponseEntity<>(updatedSchedule, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSchedule(
             @PathVariable Long id,
             @RequestBody ScheduleRequestDto requestDto) {
-
-        // 비밀번호와 함께 삭제 요청 처리
         scheduleService.deleteSchedule(id, requestDto.getPassword());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

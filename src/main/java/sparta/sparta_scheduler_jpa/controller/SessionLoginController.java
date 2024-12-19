@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -43,7 +45,7 @@ public class SessionLoginController {
         // 실패시 예외처리
         if (responseDto == null) {
             log.info("User id is null");
-            return "redirect:/";
+            return "redirect:/session-fail";
         }
 
         Long userId = responseDto.getId();
@@ -83,6 +85,12 @@ public class SessionLoginController {
         }
 
         return "redirect:/";
+    }
+
+    @GetMapping("/session-fail")
+    public ResponseEntity<String> logout() {
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed: Unauthorized access");
     }
 }
 

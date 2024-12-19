@@ -13,7 +13,7 @@ import java.io.IOException;
 @Slf4j
 public class LoginFilter implements Filter {
     // 인증을 하지 않아도될 URL Path 배열
-    private static final String[] WHITE_LIST = {"/", "/user/signup", "/login", "/logout", "/session-login", "/session-home"};
+    private static final String[] WHITE_LIST = {"/", "/user/signup", "/login", "/logout", "/session-login", "/session-home", "/session-fail"};
 
     @Override
     public void doFilter(

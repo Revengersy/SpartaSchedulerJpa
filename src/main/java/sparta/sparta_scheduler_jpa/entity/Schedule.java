@@ -1,11 +1,9 @@
 package sparta.sparta_scheduler_jpa.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -34,9 +32,4 @@ public class Schedule extends BaseEntity {
         this.user = user;
         this.password = password;
     }
-
-
-
-
-
 }

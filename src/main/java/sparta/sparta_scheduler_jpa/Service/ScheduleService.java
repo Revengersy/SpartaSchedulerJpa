@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import sparta.sparta_scheduler_jpa.config.PasswordEncoder;
 import sparta.sparta_scheduler_jpa.dto.ScheduleRequestDto;
 import sparta.sparta_scheduler_jpa.dto.ScheduleResponseDto;
 import sparta.sparta_scheduler_jpa.entity.Schedule;
@@ -29,19 +30,17 @@ public class ScheduleService {
 
     private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public ScheduleResponseDto saveSchedule(ScheduleRequestDto requestDto) {
         log.info("Save schedule - username searching: {}", requestDto.getUsername());
         User user = userRepository.findByUserName(requestDto.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-        log.info("user name for saving: {}", user.getUserName());
-
-        Schedule schedule = new Schedule(requestDto.getTask(), user, requestDto.getPassword());
+        String encryptedPassword = passwordEncoder.encode(requestDto.getPassword());
+        Schedule schedule = new Schedule(requestDto.getTask(), user, encryptedPassword);
         Schedule savedSchedule = scheduleRepository.save(schedule);
+
         return new ScheduleResponseDto(savedSchedule);
     }
 
@@ -100,7 +99,8 @@ public class ScheduleService {
     public ScheduleResponseDto updateSchedule(Long id, String task, String userName, String password) {
         Schedule existingSchedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
-        if (!existingSchedule.getPassword().equals(password)) {
+
+        if (!passwordEncoder.matches(password, existingSchedule.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect password.");
         }
 
@@ -109,8 +109,8 @@ public class ScheduleService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         existingSchedule.setUser(user);
-
         scheduleRepository.save(existingSchedule);
+
         return new ScheduleResponseDto(existingSchedule);
     }
 
@@ -133,7 +133,8 @@ public class ScheduleService {
     public void deleteSchedule(Long id, String password) {
         Schedule existingSchedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
-        if (!existingSchedule.getPassword().equals(password)) {
+
+        if (!passwordEncoder.matches(password, existingSchedule.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect password.");
         }
 

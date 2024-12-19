@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import sparta.sparta_scheduler_jpa.config.PasswordEncoder;
 import sparta.sparta_scheduler_jpa.dto.LoginResponseDto;
 import sparta.sparta_scheduler_jpa.dto.SignupResponseDto;
 import sparta.sparta_scheduler_jpa.dto.UserResponseDto;
@@ -22,28 +23,27 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public SignupResponseDto signUp(String username, String password, Integer age, String email) {
+        String encryptedPassword = passwordEncoder.encode(password);
 
-        User user = new User(username, password, age, email);
-
+        User user = new User(username, encryptedPassword, age, email);
         User savedUser = userRepository.save(user);
 
         return new SignupResponseDto(savedUser.getId(), savedUser.getUserName(), savedUser.getAge(), savedUser.getEmail());
     }
 
-    public LoginResponseDto login(String userName, String password) {
-        // 입력받은 userName, password와 일치하는 Database 조회
-        log.info("login trial");
-        User user = userRepository.findByUserNameAndPassword(userName, password);
-        log.info("user found {}", user);
+    public LoginResponseDto login(String username, String password) {
+        User user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if (user == null) {
-            // 로그인 실패 처리
-            return null; // 또는 예외를 던집니다.
+        log.info("Service : login");
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect password.");
         }
 
-        // 로그인 성공 시 LoginResponseDto 반환
         return new LoginResponseDto(user.getId(), user.getUserName());
     }
 

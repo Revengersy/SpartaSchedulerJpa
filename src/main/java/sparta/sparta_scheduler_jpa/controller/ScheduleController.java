@@ -25,32 +25,40 @@ public class ScheduleController {
 
     @PostMapping
     public ResponseEntity<ScheduleResponseDto> createSchedule(@RequestBody ScheduleRequestDto requestDto) {
-        log.info("Create schedule: {}", requestDto.getUsername());
+
         ScheduleResponseDto schedule = scheduleService.saveSchedule(requestDto);
         return new ResponseEntity<>(schedule, HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<List<ScheduleResponseDto>> findAllSchedules() {
+
         List<ScheduleResponseDto> schedules = scheduleService.findAllSchedules();
+
         return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ScheduleResponseDto> findScheduleById(@PathVariable Long id) {
+
         ScheduleResponseDto schedule = scheduleService.findScheduleById(id);
+
         return new ResponseEntity<>(schedule, HttpStatus.OK);
     }
 
     @GetMapping("/writer/{writerName}")
     public ResponseEntity<List<ScheduleResponseDto>> findSchedulesByWriter(@PathVariable String writerName) {
+
         List<ScheduleResponseDto> schedules = scheduleService.findSchedulesByWriter(writerName);
+
         return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
 
     @GetMapping("/date/{date}")
     public ResponseEntity<List<ScheduleResponseDto>> findScheduleByDate(@PathVariable String date) {
+
         List<ScheduleResponseDto> schedules = scheduleService.findScheduleByDate(date);
+
         return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
 
@@ -58,7 +66,9 @@ public class ScheduleController {
     public ResponseEntity<List<ScheduleResponseDto>> findAllSchedulesFiltered(
             @RequestParam(required = false) String editedDate,
             @RequestParam(required = false) String writerName) {
+
         List<ScheduleResponseDto> schedules = scheduleService.findAllSchedulesFiltered(editedDate, writerName);
+
         return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
 

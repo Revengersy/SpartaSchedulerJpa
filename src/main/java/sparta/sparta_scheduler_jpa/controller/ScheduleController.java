@@ -1,6 +1,7 @@
 package sparta.sparta_scheduler_jpa.controller;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import sparta.sparta_scheduler_jpa.dto.ScheduleResponseDto;
 import java.util.List;
 
 
+@Slf4j
 @RestController
 @RequestMapping("/schedules")
 public class ScheduleController {
@@ -23,6 +25,7 @@ public class ScheduleController {
 
     @PostMapping
     public ResponseEntity<ScheduleResponseDto> createSchedule(@RequestBody ScheduleRequestDto requestDto) {
+        log.info("Create schedule: {}", requestDto.getUsername());
         ScheduleResponseDto schedule = scheduleService.saveSchedule(requestDto);
         return new ResponseEntity<>(schedule, HttpStatus.CREATED);
     }
@@ -64,7 +67,7 @@ public class ScheduleController {
             @PathVariable Long id,
             @RequestBody ScheduleRequestDto requestDto) {
         ScheduleResponseDto updatedSchedule = scheduleService.updateSchedule(
-                id, requestDto.getTask(), requestDto.getWriterName(), requestDto.getPassword());
+                id, requestDto.getTask(), requestDto.getUsername(), requestDto.getPassword());
         return new ResponseEntity<>(updatedSchedule, HttpStatus.OK);
     }
 
@@ -72,7 +75,7 @@ public class ScheduleController {
     public ResponseEntity<ScheduleResponseDto> updateWriterName(
             @PathVariable Long id,
             @RequestBody ScheduleRequestDto requestDto) {
-        ScheduleResponseDto updatedSchedule = scheduleService.updateWriterName(id, requestDto.getWriterName());
+        ScheduleResponseDto updatedSchedule = scheduleService.updateWriterName(id, requestDto.getUsername());
         return new ResponseEntity<>(updatedSchedule, HttpStatus.OK);
     }
 

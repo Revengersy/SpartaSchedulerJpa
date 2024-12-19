@@ -8,11 +8,12 @@ import sparta.sparta_scheduler_jpa.entity.User;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    User findByUserName(String userName);
+    Optional<User> findByUserName(String userName);
     User findByUserNameAndPassword(String userName, String password);
 
 }

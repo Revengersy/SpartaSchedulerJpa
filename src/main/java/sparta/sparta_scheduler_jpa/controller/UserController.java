@@ -3,6 +3,7 @@ package sparta.sparta_scheduler_jpa.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sparta.sparta_scheduler_jpa.Service.UserService;
 import sparta.sparta_scheduler_jpa.dto.SignupRequestDto;
@@ -19,7 +20,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<SignupResponseDto> signUp(@RequestBody SignupRequestDto requestDto) {
+    public ResponseEntity<SignupResponseDto> signUp(@Validated @RequestBody SignupRequestDto requestDto) {
 
         SignupResponseDto signUpResponseDto =
                 userService.signUp(

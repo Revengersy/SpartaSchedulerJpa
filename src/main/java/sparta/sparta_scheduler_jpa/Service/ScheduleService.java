@@ -2,6 +2,7 @@ package sparta.sparta_scheduler_jpa.Service;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
@@ -29,10 +31,14 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
 
     public ScheduleResponseDto saveSchedule(ScheduleRequestDto requestDto) {
-        User user = userRepository.findByUserName(requestDto.getWriterName());
+        log.info("Save schedule - username searching: {}", requestDto.getUsername());
+        User user = userRepository.findByUserName(requestDto.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
+        log.info("user name for saving: {}", user.getUserName());
 
         Schedule schedule = new Schedule(requestDto.getTask(), user, requestDto.getPassword());
         Schedule savedSchedule = scheduleRepository.save(schedule);
@@ -99,7 +105,9 @@ public class ScheduleService {
         }
 
         existingSchedule.setTask(task);
-        User user = userRepository.findByUserName(userName);
+        User user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
         existingSchedule.setUser(user);
 
         scheduleRepository.save(existingSchedule);

@@ -13,7 +13,7 @@ import java.io.IOException;
 @Slf4j
 public class LoginFilter implements Filter {
     // 인증을 하지 않아도될 URL Path 배열
-    private static final String[] WHITE_LIST = {"/", "/user/signup", "/login", "/logout", "/session-login", "/session-login-ui", "/session-login-view"};
+    private static final String[] WHITE_LIST = {"/", "/user/signup", "/login", "/logout", "/session-login", "/session-home"};
 
     @Override
     public void doFilter(
@@ -42,14 +42,13 @@ public class LoginFilter implements Filter {
             // 로그인하지 않은 사용자인 경우
             if (session == null || session.getAttribute(Const.LOGIN_USER) == null) {
                 log.warn("인증되지 않은 사용자 요청: {}", requestURI);
-                httpResponse.sendRedirect("/session-login-ui"); // 로그인 화면으로 리다이렉트
+                httpResponse.sendRedirect("/"); // 메인 화면
                 return;
             }
 
             // 로그인 성공 로직
 
         }
-        log.info("next chain trial");
 
         // 1번경우 : whiteListURL에 등록된 URL 요청이면 바로 chain.doFilter()
         // 2번경우 : 필터 로직 통과 후 다음 필터 호출 chain.doFilter()

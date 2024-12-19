@@ -2,15 +2,14 @@ package sparta.sparta_scheduler_jpa.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import sparta.sparta_scheduler_jpa.Service.UserService;
 import sparta.sparta_scheduler_jpa.dto.LoginRequestDto;
 import sparta.sparta_scheduler_jpa.dto.LoginResponseDto;
@@ -19,33 +18,35 @@ import sparta.sparta_scheduler_jpa.dto.UserResponseDto;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-public class SessionUserController {
+public class SessionLoginController {
 
     private final UserService userService;
 
-    @GetMapping("/session-login-ui")
-    public String loginUi() {
-        return "session-login-view";
-    }
+
 
     @PostMapping("/session-login")
     public String login(
-            @Valid @ModelAttribute LoginRequestDto dto,
+            @Validated @ModelAttribute LoginRequestDto dto,
+            BindingResult bindingResult,
             HttpServletRequest request
     ) {
 
+        if (bindingResult.hasErrors()) {
+            return "redirect:/";
+        }
 
         log.info("session-login start");
         log.info("UserName: {}", dto.getUsername());
 
         LoginResponseDto responseDto = userService.login(dto.getUsername(), dto.getPassword());
-        Long userId = responseDto.getId();
 
         // 실패시 예외처리
-        if (userId == null) {
+        if (responseDto == null) {
             log.info("User id is null");
-            return "session-login";
+            return "redirect:/";
         }
+
+        Long userId = responseDto.getId();
 
         log.info("User id: {}", userId);
 
@@ -59,6 +60,11 @@ public class SessionUserController {
         UserResponseDto loginUser = userService.findById(userId);
         log.info("Login user: {}", loginUser);
         log.info("Logged User id: {}", loginUser.getName());
+
+        if(loginUser == null) {
+            log.info("Login user is null");
+            return "redirect:/";
+        }
 
         // Session에 로그인 회원 정보를 저장한다.
         session.setAttribute(Const.LOGIN_USER, loginUser);
@@ -76,6 +82,8 @@ public class SessionUserController {
             session.invalidate(); // 해당 세션(데이터)을 삭제한다.
         }
 
-        return "redirect:/session-home";
+        return "redirect:/";
     }
 }
+
+

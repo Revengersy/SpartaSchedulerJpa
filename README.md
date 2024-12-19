@@ -2,6 +2,45 @@
 
 Spring Boot 기반의 스케줄 관리 및 사용자 인증 기능을 제공하는 애플리케이션입니다. JPA를 활용하여 데이터를 관리하며, 다양한 컴포넌트로 구성되어 있습니다.
 
+
+## API 목록
+
+### 스케줄 관련 API
+
+| 기능                      | Method | URL                               | Request                     | Response                     | 상태                                                                 |
+|---------------------------|--------|-----------------------------------|-----------------------------|------------------------------|----------------------------------------------------------------------|
+| 스케줄 등록               | POST   | `/schedules`                      | `ScheduleRequestDto`        | `ScheduleResponseDto`        | 201: 정상등록<br>400: 요청 형식 오류<br>404: 사용자 미발견          |
+| 스케줄 조회               | GET    | `/schedules/{id}`                 | 스케줄 ID                   | `ScheduleResponseDto`        | 200: 정상조회<br>404: 스케줄 미발견                                 |
+| 스케줄 목록 조회          | GET    | `/schedules`                      | 없음                        | `List<ScheduleResponseDto>`  | 200: 정상조회                                                        |
+| 스케줄 작성자명으로 조회  | GET    | `/schedules/writer/{writerName}`  | 작성자명                    | `List<ScheduleResponseDto>`  | 200: 정상조회<br>404: 해당 작성자명으로 스케줄 미발견               |
+| 스케줄 날짜로 조회        | GET    | `/schedules/date/{date}`          | 날짜 (포맷: `yyyy-MM-dd`)   | `List<ScheduleResponseDto>`  | 200: 정상조회<br>400: 날짜 형식 오류                                |
+| 스케줄 수정               | PUT    | `/schedules/{id}`                 | 스케줄 ID, 스케줄 정보      | `ScheduleResponseDto`        | 200: 정상수정<br>404: 스케줄 또는 사용자 미발견<br>401: 비밀번호 불일치 |
+| 스케줄 작성자명 수정      | PATCH  | `/schedules/{id}`                 | 스케줄 ID, 작성자명         | `ScheduleResponseDto`        | 200: 정상수정<br>400: 요청 데이터 오류<br>404: 스케줄 또는 사용자 미발견 |
+| 스케줄 삭제               | DELETE | `/schedules/{id}`                 | 스케줄 ID, 삭제 비밀번호    | 없음                         | 204: 정상삭제<br>404: 스케줄 미발견<br>401: 비밀번호 불일치            |
+
+### 사용자 관련 API
+
+| 기능              | Method | URL            | Request                | Response               | 상태                                                |
+|-------------------|--------|----------------|------------------------|------------------------|-----------------------------------------------------|
+| 사용자 등록       | POST   | `/users/signup`| `SignupRequestDto`     | `SignupResponseDto`    | 201: 정상등록<br>400: 요청 데이터 오류              |
+| 사용자 조회       | GET    | `/users/{id}`  | 사용자 ID              | `UserResponseDto`      | 200: 정상조회<br>404: 사용자 미발견                 |
+| 사용자 목록 조회  | GET    | `/users`       | 없음                   | `List<UserResponseDto>`| 200: 정상조회                                        |
+| 사용자 수정       | PUT    | `/users/{id}`  | 사용자 ID, 사용자 정보 | `UserResponseDto`      | 200: 정상수정<br>404: 사용자 미발견                 |
+| 사용자 삭제       | DELETE | `/users/{id}`  | 사용자 ID              | 없음                   | 204: 정상삭제<br>404: 사용자 미발견                 |
+
+### 사용자 관련 API
+
+| 기능                      | Method | URL            | Request                | Response                 | 상태                                            |
+|---------------------------|--------|----------------|------------------------|--------------------------|-------------------------------------------------|
+| 사용자 등록               | POST   | `/users/signup`| `SignupRequestDto`     | `SignupResponseDto`      | 201: 정상등록<br>400: 요청 데이터 오류            |
+| 사용자 조회               | GET    | `/users/{id}`  | 사용자 ID              | `UserResponseDto`        | 200: 정상조회<br>404: 사용자 미발견               |
+| 사용자 목록 조회          | GET    | `/users`       | 없음                   | `List<UserResponseDto>`  | 200: 정상조회                                   |
+| 사용자 수정               | PUT    | `/users/{id}`  | 사용자 ID, 사용자 정보 | `UserResponseDto`        | 200: 정상수정<br>404: 사용자 미발견               |
+| 사용자 삭제               | DELETE | `/users/{id}`  | 사용자 ID              | 없음                     | 204: 정상삭제<br>404: 사용자 미발견               |
+
+
+![20241219_134913.png](..%2FDesktop%2F20241219_134913.png)
+
 ## 목차
 
 설정

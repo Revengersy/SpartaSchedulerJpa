@@ -9,6 +9,8 @@ import sparta.sparta_scheduler_jpa.dto.SignupRequestDto;
 import sparta.sparta_scheduler_jpa.dto.SignupResponseDto;
 import sparta.sparta_scheduler_jpa.dto.UserResponseDto;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -36,6 +38,32 @@ public class UserController {
         UserResponseDto memberResponseDto = userService.findById(id);
 
         return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserResponseDto>> findAllUsers() {
+        List<UserResponseDto> users = userService.findAllUsers();
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDto> updateUser(
+            @PathVariable Long id,
+            @RequestBody SignupRequestDto requestDto) {
+        UserResponseDto updatedUser = userService.updateUser(
+                id,
+                requestDto.getUsername(),
+                requestDto.getPassword(),
+                requestDto.getAge(),
+                requestDto.getEmail());
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

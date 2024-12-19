@@ -11,7 +11,7 @@ import lombok.Getter;
 public class LoginRequestDto {
     // 사용자가 입력한 아이디
     @NotBlank
-    private final String userName;
+    private final String username;
     // 사용자가 입력한 비밀번호
     @NotNull
     private final String password;

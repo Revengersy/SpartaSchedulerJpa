@@ -37,7 +37,7 @@ public class SessionHomeController {
 
         // session이 없으면 로그인 페이지로 이동
         if(session == null) {
-            log.info("session is null");
+            log.info("session is null. Convert to login page");
             return "session-login-view";
         }
 

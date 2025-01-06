@@ -28,9 +28,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public SignupResponseDto signUp(String username, String password, Integer age, String email) {
-        userRepository.findByUserName(username).orElseThrow(() -> new UserNotFoundException(username));
-
-
         String encryptedPassword = passwordEncoder.encode(password);
 
         User user = new User(username, encryptedPassword, age, email);

@@ -34,6 +34,7 @@ public class SessionLoginController {
     ) {
 
         if (bindingResult.hasErrors()) {
+            log.info("error occured at session-login");
             return "redirect:/";
         }
 

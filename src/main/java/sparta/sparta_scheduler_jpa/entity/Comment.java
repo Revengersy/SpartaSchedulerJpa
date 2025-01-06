@@ -22,7 +22,7 @@ public class Comment extends BaseEntity {
     private Schedule schedule;
 
     @ManyToOne
-    @JoinColumn(nullable = false, name = "schedule_id")
+    @JoinColumn(nullable = false, name = "user_id")
     private User user;
 
     public Comment() {} // 필수

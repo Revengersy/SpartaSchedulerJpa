@@ -1,10 +1,12 @@
 package sparta.sparta_scheduler_jpa.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import sparta.sparta_scheduler_jpa.Service.UserService;
 import sparta.sparta_scheduler_jpa.dto.SignupRequestDto;
 import sparta.sparta_scheduler_jpa.dto.SignupResponseDto;
@@ -20,7 +22,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<SignupResponseDto> signUp(@Validated @RequestBody SignupRequestDto requestDto) {
+    public ResponseEntity<SignupResponseDto> signUp(@Valid @RequestBody SignupRequestDto requestDto) {
 
         SignupResponseDto signUpResponseDto =
                 userService.signUp(
@@ -36,6 +38,7 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> findById(@PathVariable Long id) {
 
+
         UserResponseDto memberResponseDto = userService.findById(id);
 
         return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
@@ -50,7 +53,7 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable Long id,
-            @RequestBody SignupRequestDto requestDto) {
+            @Valid @RequestBody SignupRequestDto requestDto) {
         UserResponseDto updatedUser = userService.updateUser(
                 id,
                 requestDto.getUsername(),

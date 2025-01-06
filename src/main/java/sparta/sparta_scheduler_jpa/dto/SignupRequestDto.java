@@ -15,6 +15,7 @@ public class SignupRequestDto {
 
     private final Integer age;
 
+    @NotBlank
     @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
     private final String email;
 

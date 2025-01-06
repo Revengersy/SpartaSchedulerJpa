@@ -10,6 +10,8 @@ import sparta.sparta_scheduler_jpa.dto.LoginResponseDto;
 import sparta.sparta_scheduler_jpa.dto.SignupResponseDto;
 import sparta.sparta_scheduler_jpa.dto.UserResponseDto;
 import sparta.sparta_scheduler_jpa.entity.User;
+import sparta.sparta_scheduler_jpa.exception.InvalidPasswordException;
+import sparta.sparta_scheduler_jpa.exception.UserNotFoundException;
 import sparta.sparta_scheduler_jpa.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public SignupResponseDto signUp(String username, String password, Integer age, String email) {
+        userRepository.findByUserName(username).orElseThrow(() -> new UserNotFoundException(username));
+
+
         String encryptedPassword = passwordEncoder.encode(password);
 
         User user = new User(username, encryptedPassword, age, email);
@@ -36,29 +41,22 @@ public class UserService {
 
     public LoginResponseDto login(String username, String password) {
         User user = userRepository.findByUserName(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         log.info("Service : login");
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect password.");
+            throw new InvalidPasswordException("Incorrect password.");
         }
 
         return new LoginResponseDto(user.getId(), user.getUserName());
     }
 
     public UserResponseDto findById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Does not exist id = " + id));
 
-        Optional<User> optionalMember = userRepository.findById(id);
-
-        // NPE 방지
-        if (optionalMember.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exist id = " + id);
-        }
-
-        User findMember = optionalMember.get();
-
-        return new UserResponseDto(findMember.getId(), findMember.getUserName(), findMember.getEmail());
+        return new UserResponseDto(user.getId(), user.getUserName(), user.getEmail());
     }
 
     public List<UserResponseDto> findAllUsers() {
@@ -70,10 +68,10 @@ public class UserService {
     @Transactional
     public UserResponseDto updateUser(Long id, String username, String password, Integer age, String email) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id " + id));
 
         user.setUserName(username);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         user.setAge(age);
         user.setEmail(email);
 
@@ -84,7 +82,7 @@ public class UserService {
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id " + id));
         userRepository.delete(user);
     }
 

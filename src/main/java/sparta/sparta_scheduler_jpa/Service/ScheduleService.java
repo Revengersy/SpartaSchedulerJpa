@@ -3,19 +3,16 @@ package sparta.sparta_scheduler_jpa.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import sparta.sparta_scheduler_jpa.config.PasswordEncoder;
 import sparta.sparta_scheduler_jpa.dto.ScheduleRequestDto;
 import sparta.sparta_scheduler_jpa.dto.ScheduleResponseDto;
 import sparta.sparta_scheduler_jpa.entity.Schedule;
 import sparta.sparta_scheduler_jpa.entity.User;
+import sparta.sparta_scheduler_jpa.exception.*;
 import sparta.sparta_scheduler_jpa.repository.ScheduleRepository;
 import sparta.sparta_scheduler_jpa.repository.UserRepository;
-
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,7 +32,7 @@ public class ScheduleService {
     public ScheduleResponseDto saveSchedule(ScheduleRequestDto requestDto) {
         log.info("Save schedule - username searching: {}", requestDto.getUsername());
         User user = userRepository.findByUserName(requestDto.getUsername())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         String encryptedPassword = passwordEncoder.encode(requestDto.getPassword());
         Schedule schedule = new Schedule(requestDto.getTask(), user, encryptedPassword);
@@ -52,14 +49,14 @@ public class ScheduleService {
 
     public ScheduleResponseDto findScheduleById(Long id) {
         Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
+                .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found with id " + id));
         return new ScheduleResponseDto(schedule);
     }
 
     public List<ScheduleResponseDto> findSchedulesByWriter(String writerName) {
         List<Schedule> schedules = scheduleRepository.findByUser_UserName(writerName);
         if (schedules.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No schedules found for writer");
+            throw new ScheduleNotFoundException("No schedules found for writer: " + writerName);
         }
         return schedules.stream()
                 .map(ScheduleResponseDto::new)
@@ -72,41 +69,44 @@ public class ScheduleService {
             LocalDateTime startDateTime = localDate.atStartOfDay();
             LocalDateTime endDateTime = localDate.plusDays(1).atStartOfDay();
 
-            // `LocalDateTime`에 맞춰 쿼리 수행
             return scheduleRepository.findByCreatedAtBetween(startDateTime, endDateTime).stream()
                     .map(ScheduleResponseDto::new)
                     .collect(Collectors.toList());
         } catch (DateTimeParseException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format.");
+            throw new InvalidDateFormatException("Invalid date format: " + date);
         }
     }
 
     public List<ScheduleResponseDto> findAllSchedulesFiltered(String editedDate, String writerName) {
-        LocalDate dateFilter = (editedDate != null && !editedDate.isEmpty()) ? LocalDate.parse(editedDate) : null;
+        try {
+            LocalDate dateFilter = (editedDate != null && !editedDate.isEmpty()) ? LocalDate.parse(editedDate) : null;
 
-        if (dateFilter != null) {
-            return scheduleRepository.findByCreatedAtAndUser_UserName(dateFilter, writerName).stream()
-                    .map(ScheduleResponseDto::new)
-                    .collect(Collectors.toList());
-        } else {
-            return scheduleRepository.findByUser_UserName(writerName).stream()
-                    .map(ScheduleResponseDto::new)
-                    .collect(Collectors.toList());
+            if (dateFilter != null) {
+                return scheduleRepository.findByCreatedAtAndUser_UserName(dateFilter, writerName).stream()
+                        .map(ScheduleResponseDto::new)
+                        .collect(Collectors.toList());
+            } else {
+                return scheduleRepository.findByUser_UserName(writerName).stream()
+                        .map(ScheduleResponseDto::new)
+                        .collect(Collectors.toList());
+            }
+        } catch (DateTimeParseException e) {
+            throw new InvalidDateFormatException("Invalid date format: " + editedDate);
         }
     }
 
     @Transactional
     public ScheduleResponseDto updateSchedule(Long id, String task, String userName, String password) {
         Schedule existingSchedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
+                .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found with id " + id));
 
         if (!passwordEncoder.matches(password, existingSchedule.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect password.");
+            throw new InvalidPasswordException("Incorrect password.");
         }
 
         existingSchedule.setTask(task);
         User user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         existingSchedule.setUser(user);
         scheduleRepository.save(existingSchedule);
@@ -117,11 +117,11 @@ public class ScheduleService {
     @Transactional
     public ScheduleResponseDto updateWriterName(Long id, String writerName) {
         if (writerName == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The writerName is a required value.");
+            throw new InvalidInputException("The writerName is a required value.");
         }
 
         Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
+                .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found with id " + id));
 
         schedule.getUser().setUserName(writerName);
         scheduleRepository.save(schedule);
@@ -132,10 +132,10 @@ public class ScheduleService {
     @Transactional
     public void deleteSchedule(Long id, String password) {
         Schedule existingSchedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
+                .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found with id " + id));
 
         if (!passwordEncoder.matches(password, existingSchedule.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect password.");
+            throw new InvalidPasswordException("Incorrect password.");
         }
 
         scheduleRepository.deleteById(id);

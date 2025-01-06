@@ -72,15 +72,12 @@ public class UserService {
         user.setAge(age);
         user.setEmail(email);
 
-        userRepository.save(user);
         return new UserResponseDto(user.getId(), user.getUserName(), user.getEmail());
     }
 
     @Transactional
     public void deleteUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id " + id));
-        userRepository.delete(user);
+        userRepository.deleteById(id);
     }
 
 }
